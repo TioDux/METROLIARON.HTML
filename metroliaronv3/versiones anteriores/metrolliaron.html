@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventanas Interactivas</title>
+</head>
+<body style="text-align: center; font-size: 24px; background-color: #ff0000; color: white;">
+    <h1>¡Me troliaron!</h1>
+    <img src="metroliaron.jpg" style="width: 80%; max-width: 500px;">
+    <audio id="trollAudio" autoplay loop>
+        <source src="youtube_ITfUQ4CMl4U_audio.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="startBtn">Empezar</button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let audio = document.getElementById("trollAudio");
+            if (audio) {
+                audio.volume = 1.0;
+            }
+        });
+
+        let velocidadMultiplicada = 1; // Velocidad inicial
+        let ventanaAbierta = false; // Para evitar crear múltiples ciclos de ventanas
+
+        // Función para crear una nueva ventana
+        function crearVentana() {
+            // Tamaño fijo para todas las ventanas
+            let ventanaWidth = 200;  // Ancho fijo
+            let ventanaHeight = 200; // Alto fijo
+            let posX = Math.random() * (window.innerWidth - ventanaWidth); // Posición en X
+            let posY = Math.random() * (window.innerHeight - ventanaHeight); // Posición en Y
+
+            let nuevaVentana = window.open("", "_blank", `width=${ventanaWidth},height=${ventanaHeight},resizable=no`);
+            if (nuevaVentana) {
+                nuevaVentana.document.write(`
+                    <html>
+                        <head></head>
+                        <body style="text-align: center;">
+                            <img src="metroliaron.jpg" style="width: 100%;">
+                            <audio autoplay loop>
+                                <source src="youtube_ITfUQ4CMl4U_audio.mp3" type="audio/mpeg">
+                            </audio>
+                        </body>
+                    </html>
+                `);
+
+                // Variables para el movimiento de la ventana, multiplicadas por la velocidad
+                let velX = (Math.random() * 5 + 1) * velocidadMultiplicada; // Velocidad en X
+                let velY = (Math.random() * 5 + 1) * velocidadMultiplicada; // Velocidad en Y
+
+                // Función para mover la ventana
+                function moverVentana() {
+                    if (nuevaVentana.closed) return; // Si la ventana está cerrada, no hacer nada
+
+                    // Mover la ventana
+                    posX += velX;
+                    posY += velY;
+
+                    // Evitar que se salga de la pantalla
+                    if (posX + ventanaWidth > window.innerWidth || posX < 0) velX *= -1;
+                    if (posY + ventanaHeight > window.innerHeight || posY < 0) velY *= -1;
+
+                    // Mover la ventana a la nueva posición
+                    nuevaVentana.moveTo(posX, posY);
+                }
+
+                // Mover la ventana constantemente
+                setInterval(moverVentana, 10);
+
+                // Cuando se cierre la ventana, aumentar la velocidad y crear una nueva ventana
+                nuevaVentana.onbeforeunload = function () {
+                    velocidadMultiplicada *= 1.5; // Multiplicar la velocidad por 1.5
+                };
+            }
+        }
+
+        // Función para activar la creación automática de ventanas
+        function iniciarCiclo() {
+            if (!ventanaAbierta) {
+                ventanaAbierta = true;
+                // Crear la primera ventana
+                crearVentana();
+
+                // Cada 3 segundos, abrir una nueva ventana automáticamente
+                setInterval(crearVentana, 3000);
+            }
+        }
+
+        // Al hacer clic en el botón, activar la creación de ventanas
+        document.getElementById("startBtn").addEventListener("click", iniciarCiclo);
+    </script>
+</body>
+</html>

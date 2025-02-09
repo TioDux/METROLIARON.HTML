@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventanas Emergentes</title>
+</head>
+<body style="text-align: center; font-size: 24px; background-color: #ff0000; color: white;">
+    <h1>¡Me troliaron!</h1>
+    <img src="metroliaron.jpg" style="width: 80%; max-width: 500px;">
+    <audio id="trollAudio" autoplay loop>
+        <source src="youtube_ITfUQ4CMl4U_audio.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        let tiempoApertura = 3000; // Tiempo inicial entre ventanas (3 segundos)
+        let tiempoUltimoCierre = Date.now(); // Tiempo del último cierre
+        let tiempoDeCierreRapido = 1500; // Umbral de cierre rápido (1.5 segundos)
+        let velocidadMultiplicada = 1; // Velocidad inicial
+        let numeroVentanas = 1; // Número inicial de ventanas
+
+        // Función para crear una nueva ventana
+        function crearVentana() {
+            // Tamaño fijo para todas las ventanas
+            let ventanaWidth = 200;  
+            let ventanaHeight = 250; 
+            let posX = Math.random() * (window.innerWidth - ventanaWidth); 
+            let posY = Math.random() * (window.innerHeight - ventanaHeight); 
+
+            let nuevaVentana = window.open("", "_blank", `width=${ventanaWidth},height=${ventanaHeight},resizable=no`);
+            if (nuevaVentana) {
+                nuevaVentana.document.write(`
+                    <html>
+                        <head></head>
+                        <body style="text-align: center;">
+                            <img src="metroliaron.jpg" style="width: 100%;">
+                            <audio autoplay loop>
+                                <source src="youtube_ITfUQ4CMl4U_audio.mp3" type="audio/mpeg">
+                            </audio>
+                        </body>
+                    </html>
+                `);
+
+                let velX = (Math.random() * 5 + 1) * velocidadMultiplicada; // Velocidad en X
+                let velY = (Math.random() * 5 + 1) * velocidadMultiplicada; // Velocidad en Y
+
+                // Función para mover la ventana
+                function moverVentana() {
+                    if (nuevaVentana.closed) return; // Si la ventana está cerrada, no hacer nada
+
+                    posX += velX;
+                    posY += velY;
+
+                    if (posX + ventanaWidth > window.innerWidth || posX < 0) velX *= -1;
+                    if (posY + ventanaHeight > window.innerHeight || posY < 0) velY *= -1;
+
+                    nuevaVentana.moveTo(posX, posY);
+                }
+
+                setInterval(moverVentana, 10);
+
+                nuevaVentana.onbeforeunload = function () {
+                    let tiempoActual = Date.now();
+                    // Si la diferencia entre el último cierre y el cierre actual es menor que el umbral, reducimos el tiempo de aparición
+                    if (tiempoActual - tiempoUltimoCierre < tiempoDeCierreRapido) {
+                        tiempoApertura = Math.max(500, tiempoApertura - 500); // Reducir el tiempo de apertura a la mitad, con un mínimo de 500 ms
+                        numeroVentanas++; // Aumentar el número de ventanas que aparecerán
+                    }
+                    tiempoUltimoCierre = tiempoActual;
+                    velocidadMultiplicada *= 1.5; // Multiplicar la velocidad por 1.5
+                };
+            }
+        }
+
+        // Función para iniciar la creación de ventanas
+        function iniciarCiclo() {
+            // Crear la primera ventana
+            crearVentana();
+
+            // Crear nuevas ventanas a intervalos definidos
+            setInterval(() => {
+                // Crear el número de ventanas determinado por la variable `numeroVentanas`
+                for (let i = 0; i < numeroVentanas; i++) {
+                    crearVentana();
+                }
+            }, tiempoApertura);
+        }
+
+        // Iniciar el ciclo de ventanas al cargar la página
+        window.onload = function () {
+            iniciarCiclo();
+        };
+    </script>
+</body>
+</html>
